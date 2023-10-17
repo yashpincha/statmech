@@ -10,9 +10,9 @@ import numba
 import matplotlib.pyplot as plt
 
 # Parameters
-total_mc_steps = 10000000
-lattice_size = 10
-flatness_condition = 0.9
+total_mc_steps = # FIX ME
+lattice_size = # FIX ME
+flatness_condition = # FIX ME
 
 total_sites = lattice_size * lattice_size
 
@@ -29,7 +29,6 @@ def calculate_energy(lattice):
     return int(energy / 2.)  # Each pair counted twice
 
 def wang_landau_sampling(total_mc_steps, lattice_size, total_sites, energy_index, max_energy, flatness_condition):
-    "Wang Landau algorithm for Ising model in Python"
     # Initial random Ising lattice at infinite temperature
     initial_lattice = np.random.choice([-1, 1], size=(lattice_size, lattice_size))
     current_energy = calculate_energy(initial_lattice)
@@ -39,6 +38,10 @@ def wang_landau_sampling(total_mc_steps, lattice_size, total_sites, energy_index
 
     # Histogram to keep track of the number of visits to each energy state
     histogram = np.zeros(len(possible_energies), dtype=np.float64)
+
+    # Accumulate visited states and their density of states
+    visited_states = []
+    visited_dos = []
 
     # Modification factor to update density of states
     lnf = 1.0
@@ -70,9 +73,14 @@ def wang_landau_sampling(total_mc_steps, lattice_size, total_sites, energy_index
                 # Resetting histogram and reducing the modification factor
                 histogram = np.zeros(len(histogram))
                 lnf /= 2.
+
+                # Store visited state and its density of states
+                visited_states.append(current_energy)
+                visited_dos.append(log_density_of_states[current_energy + max_energy])
+
                 print(step, 'Histogram is flat', min_histogram, mean_histogram, 'lnf =', np.exp(lnf))
 
-    return log_density_of_states, histogram
+    return log_density_of_states, histogram, visited_states, visited_dos
 
 if __name__ == '__main__':
     # Possible energies of the Ising model
@@ -84,10 +92,12 @@ if __name__ == '__main__':
     max_energy = possible_energies[-1]
 
     # Index array to get the position in the Histogram array from knowing the Energy
-    energy_index = {energy: i for i, energy in enumerate(possible_energies)}
+    energy_index = -np.ones(max_energy * 2 + 1, dtype=np.int64)
+    for i, energy in enumerate(possible_energies):
+        energy_index[energy + max_energy] = i
 
     # Perform Wang-Landau sampling
-    log_density_of_states, histogram = wang_landau_sampling(total_mc_steps, lattice_size, total_sites, energy_index,
+    log_density_of_states, histogram, visited_states, visited_dos = wang_landau_sampling(total_mc_steps, lattice_size, total_sites, energy_index,
                                                             max_energy, flatness_condition)
 
     # Normalize the density of states
@@ -103,6 +113,7 @@ if __name__ == '__main__':
     # Plot results
     plt.plot(possible_energies, log_density_of_states, '-o', label='log(g(E))')
     plt.plot(possible_energies, histogram, '-s', label='Histogram')
+    plt.scatter(visited_states, visited_dos, color='red', label='Visited States')
     plt.xlabel('Energy')
     plt.legend(loc='best')
     plt.show()
