@@ -3,7 +3,7 @@
 Wikipedia: The Wang and Landau algorithm is used to obtain an estimate for the density of states of a system characterized by a cost function. 
 It uses a non-Markovian stochastic process which asymptotically converges to a multicanonical ensemble.
 The major consequence is that this sampling distribution leads to a simulation where the energy barriers are invisible. 
-This means that the algorithm visits all the accessible states (favorable and less favorable) much faster than a Metropolis algorithm.
+This means that the algorithm is ergodic and much faster than a Metropolis algorithm.
 '''
 import numpy as np
 import numba
