@@ -84,9 +84,7 @@ if __name__ == '__main__':
     max_energy = possible_energies[-1]
 
     # Index array to get the position in the Histogram array from knowing the Energy
-    energy_index = -np.ones(max_energy * 2 + 1, dtype=np.int64)
-    for i, energy in enumerate(possible_energies):
-        energy_index[energy + max_energy] = i
+    energy_index = {energy: i for i, energy in enumerate(possible_energies)}
 
     # Perform Wang-Landau sampling
     log_density_of_states, histogram = wang_landau_sampling(total_mc_steps, lattice_size, total_sites, energy_index,
